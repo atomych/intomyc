@@ -1,22 +1,11 @@
 <template>
   <div class="container">
     <dialog-item
-      :name="'user'"
+      :nameFrom="'user'"
       :whoLast="'user'"
       :unWatched="1"
       :lastMess="'Hello'"
-    />
-    <dialog-item
-      :name="'user'"
-      :whoLast="'atomych'"
-      :unWatched="0"
-      :lastMess="'Hello2'"
-    />
-    <dialog-item
-      :name="'user'"
-      :whoLast="'user'"
-      :unWatched="0"
-      :lastMess="'Hello3'"
+      @click="toDialog()"
     />
   </div>
 </template>
@@ -40,6 +29,12 @@ export default {
 
   components: {
     DialogItem,
+  },
+
+  methods: {
+    toDialog() {
+      this.$router.push({ name: "dialog" });
+    },
   },
 };
 </script>
