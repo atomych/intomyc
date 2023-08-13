@@ -59,6 +59,10 @@ import DefaultField from "../components/DefaultField.vue";
 import DefaultButton from "../components/DefaultButton.vue";
 import DefaultLink from "../components/DefaultLink.vue";
 
+import { signIn } from "../firebase/auth";
+import { readData } from "../firebase/database";
+import { mapMutations } from "vuex";
+
 export default {
   name: "EntryPage",
 
@@ -76,9 +80,29 @@ export default {
   },
 
   methods: {
+    ...mapMutations(["setUID", "setName"]),
+
     login() {
-      console.log("login");
+      if (this.email != "" && this.password.length >= 6) {
+        signIn(this.email, this.password)
+          .then((data) => {
+            this.setUID(data.user.uid);
+            readData(`users/${data.user.uid}`)
+              .then((snapshot) => {
+                const userData = snapshot.val();
+                this.setName(userData.name);
+                this.$router.push({ name: "user" });
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }
     },
+
     toCreate() {
       this.$router.push({ name: "reg" });
     },
