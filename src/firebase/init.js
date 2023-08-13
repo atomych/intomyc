@@ -7,6 +7,7 @@ const firebaseConfig = {
   storageBucket: "intomyc-2c473.appspot.com",
   messagingSenderId: "784806974289",
   appId: "1:784806974289:web:698d57380858abfb273970",
+  databaseURL: "https://intomyc-2c473-default-rtdb.firebaseio.com",
 };
 
 const app = initializeApp(firebaseConfig);
