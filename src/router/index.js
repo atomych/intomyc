@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+import App from "../App.vue";
 import StartView from "../views/StartView.vue";
 import UserView from "../views/UserView.vue";
 import EntryPage from "../pages/EntryPage.vue";
@@ -11,7 +12,12 @@ import DialogPage from "../pages/DialogPage.vue";
 const routes = [
   {
     path: "/",
-    name: "view",
+    name: "app",
+    component: App,
+  },
+  {
+    path: "/start",
+    name: "start",
     component: StartView,
     children: [
       {
@@ -24,32 +30,32 @@ const routes = [
         name: "reg",
         component: RegPage,
       },
+    ],
+  },
+  {
+    path: "/user",
+    name: "user",
+    component: UserView,
+    children: [
       {
-        path: "user",
-        name: "user",
-        component: UserView,
-        children: [
-          {
-            path: "messages",
-            name: "mess",
-            component: MessPage,
-          },
-          {
-            path: "settings",
-            name: "sett",
-            component: SettPage,
-          },
-          {
-            path: "search",
-            name: "search",
-            component: SearchPage,
-          },
-          {
-            path: "dialog&id=:id",
-            name: "dialog",
-            component: DialogPage,
-          },
-        ],
+        path: "messages",
+        name: "mess",
+        component: MessPage,
+      },
+      {
+        path: "settings",
+        name: "sett",
+        component: SettPage,
+      },
+      {
+        path: "search",
+        name: "search",
+        component: SearchPage,
+      },
+      {
+        path: "dialog&id=:id",
+        name: "dialog",
+        component: DialogPage,
       },
     ],
   },
