@@ -1,7 +1,7 @@
 <template>
   <div class="wrapper" :class="{ unwatched: unWatched > 0 }">
     <img src="../assets/images/user.png" alt="" class="photo" />
-    <div class="name">{{ name }}</div>
+    <div class="name">{{ nameFrom }}</div>
     <div class="you" v-if="userLast">| You</div>
     <div class="dots">:</div>
     <div class="mess">{{ lastMess }}</div>
@@ -88,7 +88,7 @@ export default {
   name: "DialogItem",
 
   props: {
-    name: {
+    nameFrom: {
       type: String,
       default: "User",
       required: true,
