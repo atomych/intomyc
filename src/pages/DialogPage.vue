@@ -1,17 +1,14 @@
 <template>
   <div class="container">
     <default-header
-      :title="
-        dialogs
-          .filter((el) => el.id == id)[0]
-          .names.filter((el) => el != name)[0]
-      "
+      :title="dialogs.filter((el) => el.id == id)[0].companionData.name"
+      :photoSrc="dialogs.filter((el) => el.id == id)[0].companionData.photo.src"
     />
     <ul class="list">
       <dialog-message
         v-for="(mess, index) in dialogs.filter((el) => el.id == id)[0].messages"
         :key="index"
-        :side="mess.from == name ? 'right' : 'left'"
+        :side="mess.from == uid ? 'right' : 'left'"
         :text="mess.text"
         class="mess"
       />
@@ -72,11 +69,10 @@ export default {
 
   created() {
     this.id = this.$route.params.id;
-    console.log(this.dialogs, this.id);
   },
 
   computed: {
-    ...mapGetters(["dialogs", "name"]),
+    ...mapGetters(["dialogs", "name", "uid"]),
   },
 };
 </script>
