@@ -1,10 +1,20 @@
 <template>
   <div class="container">
-    <default-header :title="'User'" />
+    <default-header
+      :title="
+        dialogs
+          .filter((el) => el.id == id)[0]
+          .names.filter((el) => el != name)[0]
+      "
+    />
     <ul class="list">
-      <dialog-message :side="'left'" :text="'Hello'" class="mess" />
-      <dialog-message :side="'right'" :text="'Hello1'" class="mess" />
-      <dialog-message :side="'left'" :text="'Hello2'" class="mess" />
+      <dialog-message
+        v-for="(mess, index) in dialogs.filter((el) => el.id == id)[0].messages"
+        :key="index"
+        :side="mess.from == name ? 'right' : 'left'"
+        :text="mess.text"
+        class="mess"
+      />
     </ul>
     <message-input />
   </div>
@@ -43,6 +53,8 @@ import DefaultHeader from "../components/DefaultHeader.vue";
 import DialogMessage from "../components/DialogMessage.vue";
 import MessageInput from "../components/MessageInput.vue";
 
+import { mapGetters } from "vuex";
+
 export default {
   name: "DialogPage",
 
@@ -50,6 +62,21 @@ export default {
     DefaultHeader,
     DialogMessage,
     MessageInput,
+  },
+
+  data() {
+    return {
+      id: "",
+    };
+  },
+
+  created() {
+    this.id = this.$route.params.id;
+    console.log(this.dialogs, this.id);
+  },
+
+  computed: {
+    ...mapGetters(["dialogs", "name"]),
   },
 };
 </script>
