@@ -21,6 +21,7 @@
     />
   </div>
 </template>
+
 <style lang="scss" scoped>
 .window {
   padding: 20px 100px;
