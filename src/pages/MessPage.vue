@@ -1,11 +1,13 @@
 <template>
   <div class="container">
     <dialog-item
-      :nameFrom="'user'"
-      :whoLast="'user'"
-      :unWatched="1"
-      :lastMess="'Hello'"
-      @click="toDialog()"
+      v-for="dialog in dialogs"
+      :key="dialog.id"
+      :nameFrom="dialog.names.filter((el) => el != name)[0]"
+      :whoLast="dialog.messages[dialog.messages.length - 1].from"
+      :unWatched="0"
+      :lastMess="dialog.messages[dialog.messages.length - 1].text"
+      @click="toDialog(dialog.id)"
     />
   </div>
 </template>
@@ -23,6 +25,7 @@
 
 <script>
 import DialogItem from "../components/DialogItem.vue";
+import { mapGetters } from "vuex";
 
 export default {
   name: "MessPage",
@@ -32,9 +35,13 @@ export default {
   },
 
   methods: {
-    toDialog() {
-      this.$router.push({ name: "dialog" });
+    toDialog(id) {
+      this.$router.push({ name: "dialog", params: { id: id } });
     },
+  },
+
+  computed: {
+    ...mapGetters(["dialogs", "name"]),
   },
 };
 </script>
