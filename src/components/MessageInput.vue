@@ -1,7 +1,7 @@
 <template>
   <div class="wrapper">
-    <input type="text" class="input" />
-    <button class="btn">Send</button>
+    <input type="text" class="input" v-model="message" />
+    <button class="btn" @click="$emit('send', message)">Send</button>
   </div>
 </template>
 
@@ -57,5 +57,15 @@
 <script>
 export default {
   name: "MessageInput",
+
+  data() {
+    return {
+      message: "",
+    };
+  },
+
+  emits: {
+    send: null,
+  },
 };
 </script>
