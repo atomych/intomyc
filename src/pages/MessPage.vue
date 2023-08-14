@@ -3,7 +3,8 @@
     <dialog-item
       v-for="dialog in dialogs"
       :key="dialog.id"
-      :nameFrom="dialog.names.filter((el) => el != name)[0]"
+      :photoSrc="dialog.companionData.photo.src"
+      :nameFrom="dialog.companionData.name"
       :whoLast="dialog.messages[dialog.messages.length - 1].from"
       :unWatched="0"
       :lastMess="dialog.messages[dialog.messages.length - 1].text"
@@ -41,7 +42,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(["dialogs", "name"]),
+    ...mapGetters(["dialogs", "name", "uid"]),
   },
 };
 </script>
