@@ -1,6 +1,6 @@
 <template>
   <div class="wrapper" :class="{ unwatched: unWatched > 0 }">
-    <img src="../assets/images/user.png" alt="" class="photo" />
+    <img :src="photoSrc" alt="" class="photo" />
     <div class="name">{{ nameFrom }}</div>
     <div class="you" v-if="userLast">| You</div>
     <div class="dots">:</div>
@@ -104,6 +104,11 @@ export default {
       required: true,
     },
     lastMess: {
+      type: String,
+      default: "",
+      required: true,
+    },
+    photoSrc: {
       type: String,
       default: "",
       required: true,
