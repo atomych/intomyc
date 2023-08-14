@@ -4,13 +4,24 @@
     <ul class="list">
       <li class="list__item">
         <div class="text">Change your photo:</div>
-        <default-button :text="'Choose'" />
+        <default-button :text="'Choose'" @clickIn="selectPhoto()" />
       </li>
       <li class="list__item">
         <div class="text">Change your name:</div>
-        <input type="text" class="input" />
+        <input
+          type="text"
+          class="input"
+          v-model="nameValue"
+          @change="changeName()"
+        />
       </li>
     </ul>
+    <input
+      type="file"
+      class="input-file"
+      ref="inputFile"
+      @change="changePhoto()"
+    />
   </div>
 </template>
 
@@ -65,11 +76,17 @@
     }
   }
 }
+
+.input-file {
+  display: none;
+}
 </style>
 
 <script>
 import DefaultHeader from "../components/DefaultHeader.vue";
 import DefaultButton from "../components/DefaultButton.vue";
+
+import { mapGetters, mapActions } from "vuex";
 
 export default {
   name: "SettPage",
@@ -77,6 +94,37 @@ export default {
   components: {
     DefaultHeader,
     DefaultButton,
+  },
+
+  created() {
+    this.nameValue = this.name;
+  },
+
+  data() {
+    return {
+      nameValue: "",
+    };
+  },
+
+  computed: {
+    ...mapGetters(["name"]),
+  },
+
+  methods: {
+    ...mapActions(["changeUserName", "uploadUserPhoto"]),
+
+    changeName() {
+      if (this.nameValue.length >= 5) this.changeUserName(this.nameValue);
+      else this.nameValue = this.name;
+    },
+
+    selectPhoto() {
+      this.$refs.inputFile.click();
+    },
+
+    changePhoto() {
+      this.uploadUserPhoto(this.$refs.inputFile.files[0]);
+    },
   },
 };
 </script>
