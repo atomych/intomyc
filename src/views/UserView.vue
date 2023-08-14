@@ -3,7 +3,7 @@
     <div class="aside">
       <div>
         <p class="nick">{{ name }}</p>
-        <img src="../assets/images/user.png" alt="" class="photo" />
+        <img :src="photo?.src" alt="" class="photo" />
       </div>
       <ul class="menu">
         <li class="menu__item" @click="toSearch()">Search people</li>
@@ -45,7 +45,7 @@
 }
 
 .photo {
-  width: 100%;
+  width: 250px;
   height: auto;
 }
 
@@ -97,7 +97,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(["name"]),
+    ...mapGetters(["name", "photo"]),
   },
 };
 </script>
