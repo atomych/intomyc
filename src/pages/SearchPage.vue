@@ -1,12 +1,12 @@
 <template>
   <div class="container">
     <default-header :title="'Search people'" class="head" />
-    <input type="text" class="input" />
+    <input type="text" class="input" v-model="searchValue" />
     <ul class="list">
-      <li class="list__item">
+      <li class="list__item" v-for="user in normalizedUsers" :key="user.uid">
         <div class="left">
-          <img src="../assets/images/user.png" alt="" class="photo" />
-          <div class="name">User1</div>
+          <img :src="user.photoObj.src" alt="" class="photo" />
+          <div class="name">{{ user.name }}</div>
         </div>
         <button class="btn">Write</button>
       </li>
@@ -58,6 +58,8 @@
     padding: 10px 15px;
     background-color: #ffffff8d;
     border-radius: 5px;
+
+    margin-bottom: 10px;
   }
 }
 
@@ -95,11 +97,35 @@
 <script>
 import DefaultHeader from "../components/DefaultHeader.vue";
 
+import { mapActions, mapGetters } from "vuex";
+
 export default {
   name: "SearchPage",
 
   components: {
     DefaultHeader,
+  },
+
+  created() {
+    this.downloadUsersList();
+  },
+
+  data() {
+    return {
+      searchValue: "",
+    };
+  },
+
+  methods: {
+    ...mapActions(["downloadUsersList"]),
+  },
+
+  computed: {
+    ...mapGetters(["users"]),
+
+    normalizedUsers() {
+      return this.users.filter((el) => el.name.startsWith(this.searchValue));
+    },
   },
 };
 </script>
