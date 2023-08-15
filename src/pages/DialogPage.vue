@@ -13,7 +13,7 @@
         class="mess"
       />
     </ul>
-    <message-input />
+    <message-input @send="send()" v-model:message="message" />
   </div>
 </template>
 
@@ -50,7 +50,7 @@ import DefaultHeader from "../components/DefaultHeader.vue";
 import DialogMessage from "../components/DialogMessage.vue";
 import MessageInput from "../components/MessageInput.vue";
 
-import { mapGetters } from "vuex";
+import { mapGetters, mapActions } from "vuex";
 
 export default {
   name: "DialogPage",
@@ -64,6 +64,7 @@ export default {
   data() {
     return {
       id: "",
+      message: "",
     };
   },
 
@@ -73,6 +74,15 @@ export default {
 
   computed: {
     ...mapGetters(["dialogs", "name", "uid"]),
+  },
+
+  methods: {
+    ...mapActions(["sendMessage"]),
+
+    send() {
+      this.sendMessage({ text: this.message, id: this.id });
+      this.message = "";
+    },
   },
 };
 </script>
