@@ -1,7 +1,12 @@
 <template>
   <div class="wrapper">
-    <input type="text" class="input" v-model="message" />
-    <button class="btn" @click="$emit('send', message)">Send</button>
+    <input
+      type="text"
+      class="input"
+      :value="message"
+      @input="$emit('update:message', $event.target.value)"
+    />
+    <button class="btn" @click="$emit('send')">Send</button>
   </div>
 </template>
 
@@ -58,14 +63,17 @@
 export default {
   name: "MessageInput",
 
-  data() {
-    return {
-      message: "",
-    };
+  props: {
+    message: {
+      type: String,
+      default: "",
+      required: false,
+    },
   },
 
   emits: {
     send: null,
+    "update:message": null,
   },
 };
 </script>
