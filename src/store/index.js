@@ -1,7 +1,7 @@
 import { createStore } from "vuex";
 
 import { signIn } from "../firebase/auth";
-import { readData, writeData } from "../firebase/database";
+import { readData, writeData, subscribeToUpadate } from "../firebase/database";
 import { downloadImage, uploadImage } from "../firebase/storage";
 
 export default createStore({
@@ -11,6 +11,7 @@ export default createStore({
     photo: "",
     dialogsID: [],
     dialogs: [],
+    users: [],
   },
   actions: {
     auth({ commit, dispatch }, data) {
@@ -58,7 +59,7 @@ export default createStore({
           });
       }
     },
-    downloadAddingDialogInfo({ commit }, data) {
+    downloadAddingDialogInfo({ commit, dispatch }, data) {
       const companionUID = data.dialog.uids.filter((el) => el != data.uid);
 
       readData(`users/${companionUID}`).then((snapshot) => {
@@ -79,11 +80,17 @@ export default createStore({
                 photo: img,
               };
               commit("addDialog", data.dialog);
+              dispatch("subscribeToUpdateMessages", data.dialog.id);
             };
           })
           .catch((err) => {
             console.log(err);
           });
+      });
+    },
+    subscribeToUpdateMessages({ commit }, id) {
+      subscribeToUpadate(`dialogs/${id}/messages`, (snapshot) => {
+        commit("changeMessagesOfDialog", { mess: snapshot.val(), id: id });
       });
     },
     changeUserName({ commit, state }, name) {
@@ -135,6 +142,44 @@ export default createStore({
         });
       };
     },
+    sendMessage({ state }, data) {
+      const messages = state.dialogs.filter((el) => el.id == data.id)[0]
+        .messages;
+      messages.push({
+        from: state.uid,
+        text: data.text,
+      });
+
+      writeData(`dialogs/${data.id}/messages`, messages);
+    },
+    downloadUsersList({ commit }) {
+      commit("clearUsersList");
+      readData(`users`)
+        .then((snapshot) => {
+          const users = Object.values(snapshot.val());
+          for (let item of users) {
+            let link;
+
+            if (item.photo) {
+              link = `${item.uid}/${item.photo}`;
+            } else {
+              link = `default/user.png`;
+            }
+
+            downloadImage(link).then((URL) => {
+              const img = new Image();
+              img.src = URL;
+              img.onload = () => {
+                item.photoObj = img;
+                commit("addUserInList", item);
+              };
+            });
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
   },
   mutations: {
     setUID(state, uid) {
@@ -152,6 +197,15 @@ export default createStore({
     addDialog(state, dialog) {
       state.dialogs.push(dialog);
     },
+    changeMessagesOfDialog(state, data) {
+      state.dialogs.filter((el) => el.id == data.id)[0].messages = data.mess;
+    },
+    addUserInList(state, user) {
+      state.users.push(user);
+    },
+    clearUsersList(state) {
+      state.users = [];
+    },
   },
   getters: {
     uid(state) {
@@ -165,6 +219,9 @@ export default createStore({
     },
     photo(state) {
       return state.photo;
+    },
+    users(state) {
+      return state.users.filter((el) => el.uid != state.uid);
     },
   },
 });
