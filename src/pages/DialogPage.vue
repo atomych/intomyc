@@ -1,14 +1,19 @@
 <template>
   <div class="container">
     <default-header
-      :title="dialogs.filter((el) => el.id == id)[0].companionData.name"
-      :photoSrc="dialogs.filter((el) => el.id == id)[0].companionData.photo.src"
+      :title="dialogs.filter((el) => el.id == id)[0]?.companionData.name"
+      :photoSrc="
+        dialogs.filter((el) => el.id == id)[0]?.companionData.photo.src
+      "
     />
     <ul class="list">
       <dialog-message
-        v-for="(mess, index) in dialogs.filter((el) => el.id == id)[0].messages"
+        v-for="(mess, index) in dialogs.filter((el) => el.id == id)[0]
+          ?.messages"
         :key="index"
-        :side="mess.from == uid ? 'right' : 'left'"
+        :side="
+          mess.from == 'start' ? 'start' : mess.from == uid ? 'right' : 'left'
+        "
         :text="mess.text"
         class="mess"
       />
