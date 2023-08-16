@@ -24,6 +24,10 @@
     border-bottom-left-radius: 8px;
     border-top-right-radius: 8px;
   }
+
+  &.start {
+    display: none;
+  }
 }
 </style>
 
