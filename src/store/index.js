@@ -1,8 +1,9 @@
 import { createStore } from "vuex";
 
-import { signIn } from "../firebase/auth";
+import { signIn, createUser } from "../firebase/auth";
 import { readData, writeData, subscribeToUpadate } from "../firebase/database";
 import { downloadImage, uploadImage } from "../firebase/storage";
+import { getID, getKey } from "../js/generator";
 
 export default createStore({
   state: {
@@ -14,11 +15,122 @@ export default createStore({
     users: [],
   },
   actions: {
+    loginNewUser({ dispatch }, data) {
+      createUser(data.email, data.password).then((userData) => {
+        dispatch("regNewUserInDatabase", {
+          uid: userData.user.uid,
+          name: data.name,
+          email: data.email,
+          password: data.password,
+        });
+      });
+    },
+    regNewUserInDatabase({ dispatch }, data) {
+      writeData(`users/${data.uid}`, {
+        name: data.name,
+        dialogs: ["dnone"],
+        uid: data.uid,
+        photo: false,
+      });
+      dispatch("regPersonalDataInDatabase", {
+        uid: data.uid,
+        email: data.email,
+        password: data.password,
+      });
+    },
+    regPersonalDataInDatabase({ dispatch }, data) {
+      dispatch("empty");
+      const key = getKey();
+      writeData(`PERSONAL/${data.uid}`, {
+        email: data.email,
+        password: data.password,
+        key: key,
+      });
+      writeData(`AUTOENTRYKEYS/${key}`, data.uid);
+    },
+    autoEntry({ dispatch }, data) {
+      readData(`AUTOENTRYKEYS/${data.key}`)
+        .then((snapshot) => {
+          const uid = snapshot.val();
+
+          if (uid) {
+            readData(`PERSONAL/${uid}`)
+              .then((snapshot) => {
+                const personalData = snapshot.val();
+
+                if (personalData.key == data.key) {
+                  dispatch("auth", {
+                    email: personalData.email,
+                    password: personalData.password,
+                    auto: true,
+                    cb: data.cb,
+                  });
+                }
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+    unlogin({ commit }, cb) {
+      localStorage.setItem("checkbox", "");
+      commit("clearData");
+      cb();
+    },
+    downloadPersonalKey({ dispatch }, uid) {
+      readData(`PERSONAL/${uid}/key`).then((snapshot) => {
+        localStorage.setItem("AUTOENTRYKEY", snapshot.val());
+        dispatch("empty");
+      });
+    },
+    empty() {},
+    createNewDialog({ state }, startData) {
+      readData(`users/${startData.userUID}`).then((snapshot) => {
+        const data = snapshot.val();
+        const dialogID = "d" + getID();
+
+        if (data.dialogs) data.dialogs.push(dialogID);
+        else data.dialogs = [dialogID];
+
+        writeData(`dialogs/${dialogID}`, {
+          uids: [startData.userUID, state.uid],
+          id: dialogID,
+          messages: [
+            {
+              from: "start",
+              text: "",
+            },
+          ],
+        }).then(() => {
+          writeData(
+            `users/${state.uid}/dialogs`,
+            state.dialogsID.length ? [...state.dialogsID, dialogID] : [dialogID]
+          ).then(() => {
+            writeData(`users/${startData.userUID}/dialogs`, data.dialogs).then(
+              () => {
+                console.log("callback started");
+                startData.cb(dialogID);
+              }
+            );
+          });
+        });
+      });
+    },
     auth({ commit, dispatch }, data) {
       signIn(data.email, data.password)
         .then((userCr) => {
           commit("setUID", userCr.user.uid);
+
+          if (data.auto) {
+            data.cb();
+          }
+
           dispatch("getUserData", userCr.user.uid);
+          dispatch("downloadPersonalKey", userCr.user.uid);
         })
         .catch((err) => {
           console.log(err);
@@ -29,12 +141,8 @@ export default createStore({
         .then((snapshot) => {
           const userData = snapshot.val();
           commit("setName", userData.name);
-          commit("setDialogsID", userData.dialogs);
           commit("setPhoto", userData.photo);
-          dispatch("downloadDialogs", {
-            dialogsID: userData.dialogs,
-            uid: userData.uid,
-          });
+          dispatch("subscribeToUpdateDialogs", uid);
           dispatch("downloadUserPhoto", {
             photo: userData.photo,
             uid: userData.uid,
@@ -80,12 +188,27 @@ export default createStore({
                 photo: img,
               };
               commit("addDialog", data.dialog);
+              console.log("new dialog was downloaded");
               dispatch("subscribeToUpdateMessages", data.dialog.id);
             };
           })
           .catch((err) => {
             console.log(err);
           });
+      });
+    },
+    subscribeToUpdateDialogs({ commit, dispatch }, uid) {
+      subscribeToUpadate(`users/${uid}/dialogs`, (snapshot) => {
+        commit("clearDialogs");
+        console.log("new dialog!");
+        const data = snapshot.val().filter((el) => el != "dnone");
+        commit("setDialogsID", data);
+        if (data.length) {
+          dispatch("downloadDialogs", {
+            dialogsID: data,
+            uid: uid,
+          });
+        }
       });
     },
     subscribeToUpdateMessages({ commit }, id) {
@@ -204,6 +327,18 @@ export default createStore({
       state.users.push(user);
     },
     clearUsersList(state) {
+      state.users = [];
+    },
+    clearDialogs(state) {
+      state.dialogs = [];
+      state.dialogsID = [];
+    },
+    clearData(state) {
+      state.uid = "";
+      state.name = "";
+      state.photo = "";
+      state.dialogsID = [];
+      state.dialogs = [];
       state.users = [];
     },
   },
