@@ -8,7 +8,7 @@
           <img :src="user.photoObj.src" alt="" class="photo" />
           <div class="name">{{ user.name }}</div>
         </div>
-        <button class="btn">Write</button>
+        <button class="btn" @click="createDialog(user.uid)">Write</button>
       </li>
     </ul>
   </div>
@@ -117,7 +117,16 @@ export default {
   },
 
   methods: {
-    ...mapActions(["downloadUsersList"]),
+    ...mapActions(["downloadUsersList", "createNewDialog"]),
+
+    createDialog(uid) {
+      this.createNewDialog({
+        userUID: uid,
+        cb: (id) => {
+          this.$router.push({ name: "dialog", params: { id: id } });
+        },
+      });
+    },
   },
 
   computed: {
