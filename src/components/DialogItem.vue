@@ -116,10 +116,10 @@ export default {
   },
 
   computed: {
-    ...mapGetters(["name"]),
+    ...mapGetters(["uid"]),
 
     userLast() {
-      return this.whoLast == this.name;
+      return this.whoLast == this.uid;
     },
   },
 };
