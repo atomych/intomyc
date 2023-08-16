@@ -9,7 +9,7 @@
         <li class="menu__item" @click="toSearch()">Search people</li>
         <li class="menu__item" @click="toMess()">Messages</li>
         <li class="menu__item" @click="toSett()">Settings</li>
-        <li class="menu__item">Exit</li>
+        <li class="menu__item" @click="exit()">Exit</li>
       </ul>
     </div>
     <router-view class="content-view" />
@@ -73,7 +73,7 @@
 </style>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapGetters, mapActions } from "vuex";
 
 export default {
   name: "UserView",
@@ -83,6 +83,8 @@ export default {
   },
 
   methods: {
+    ...mapActions(["downloadPersonalKey", "unlogin"]),
+
     toMess() {
       this.$router.push({ name: "mess" });
     },
@@ -94,10 +96,16 @@ export default {
     toSearch() {
       this.$router.push({ name: "search" });
     },
+
+    exit() {
+      this.unlogin(() => {
+        this.$router.push({ name: "start" });
+      });
+    },
   },
 
   computed: {
-    ...mapGetters(["name", "photo"]),
+    ...mapGetters(["name", "photo", "uid"]),
   },
 };
 </script>
