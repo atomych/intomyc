@@ -7,6 +7,12 @@
       class="field-out"
     />
     <default-field
+      :fieldType="'text'"
+      :text="'Write name'"
+      v-model:fieldValue="name"
+      class="field-out"
+    />
+    <default-field
       :fieldType="'password'"
       :text="'Write password'"
       v-model:fieldValue="password"
@@ -56,6 +62,8 @@ import DefaultField from "../components/DefaultField.vue";
 import DefaultButton from "../components/DefaultButton.vue";
 import DefaultLink from "../components/DefaultLink.vue";
 
+import { mapActions } from "vuex";
+
 export default {
   name: "RegPage",
 
@@ -67,6 +75,7 @@ export default {
 
   data() {
     return {
+      name: "",
       email: "",
       password: "",
       password2: "",
@@ -74,8 +83,18 @@ export default {
   },
 
   methods: {
+    ...mapActions(["loginNewUser"]),
+
     create() {
-      console.log("create");
+      console.log(this.email);
+      if (this.password == this.password2 && this.password.length >= 6) {
+        this.loginNewUser({
+          email: this.email,
+          password: this.password,
+          name: this.name,
+        });
+        this.$router.push({ name: "entry" });
+      }
     },
 
     toLogin() {
