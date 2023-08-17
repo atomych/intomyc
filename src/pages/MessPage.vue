@@ -1,12 +1,15 @@
 <template>
-  <div class="container">
+  <div class="container scroll">
     <dialog-item
       v-for="dialog in dialogs"
       :key="dialog.id"
       :photoSrc="dialog.companionData.photo.src"
       :nameFrom="dialog.companionData.name"
       :whoLast="dialog.messages[dialog.messages.length - 1].from"
-      :unWatched="0"
+      :unWatched="
+        dialog.messages.filter((el) => el.watched == false && el.from != uid)
+          .length
+      "
       :lastMess="dialog.messages[dialog.messages.length - 1].text"
       @click="toDialog(dialog.id)"
     />
