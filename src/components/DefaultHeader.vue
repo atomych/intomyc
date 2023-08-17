@@ -33,6 +33,8 @@
   height: 50px;
   object-fit: cover;
   margin-right: 10px;
+
+  border-radius: 50%;
 }
 </style>
 
