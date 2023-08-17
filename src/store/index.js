@@ -13,9 +13,12 @@ export default createStore({
     dialogsID: [],
     dialogs: [],
     users: [],
+    download: false,
+    currentDialog: "",
   },
   actions: {
-    loginNewUser({ dispatch }, data) {
+    loginNewUser({ dispatch, commit }, data) {
+      commit("setDownload", true);
       createUser(data.email, data.password).then((userData) => {
         dispatch("regNewUserInDatabase", {
           uid: userData.user.uid,
@@ -38,17 +41,21 @@ export default createStore({
         password: data.password,
       });
     },
-    regPersonalDataInDatabase({ dispatch }, data) {
+    regPersonalDataInDatabase({ dispatch, commit }, data) {
       dispatch("empty");
       const key = getKey();
       writeData(`PERSONAL/${data.uid}`, {
         email: data.email,
         password: data.password,
         key: key,
+      }).then(() => {
+        writeData(`AUTOENTRYKEYS/${key}`, data.uid).then(() => {
+          commit("setDownload", false);
+        });
       });
-      writeData(`AUTOENTRYKEYS/${key}`, data.uid);
     },
-    autoEntry({ dispatch }, data) {
+    autoEntry({ dispatch, commit }, data) {
+      commit("setDownload", true);
       readData(`AUTOENTRYKEYS/${data.key}`)
         .then((snapshot) => {
           const uid = snapshot.val();
@@ -103,6 +110,7 @@ export default createStore({
             {
               from: "start",
               text: "",
+              watched: true,
             },
           ],
         }).then(() => {
@@ -123,13 +131,12 @@ export default createStore({
       });
     },
     auth({ commit, dispatch }, data) {
+      commit("setDownload", true);
       signIn(data.email, data.password)
         .then((userCr) => {
           commit("setUID", userCr.user.uid);
 
-          if (data.auto) {
-            data.cb();
-          }
+          data.cb();
 
           dispatch("getUserData", userCr.user.uid);
           dispatch("downloadPersonalKey", userCr.user.uid);
@@ -192,11 +199,41 @@ export default createStore({
               commit("addDialog", data.dialog);
               console.log("new dialog was downloaded");
               dispatch("subscribeToUpdateMessages", data.dialog.id);
+              dispatch("subscribeToUpdateAddingDialogInfo", {
+                uid: companionUID,
+                dialogID: data.dialog.id,
+              });
             };
           })
           .catch((err) => {
             console.log(err);
           });
+      });
+    },
+    subscribeToUpdateAddingDialogInfo({ commit }, data) {
+      subscribeToUpadate(`users/${data.uid}/name`, (snapshot) => {
+        commit("setCompanionName", {
+          dialogID: data.dialogID,
+          name: snapshot.val(),
+        });
+      });
+      subscribeToUpadate(`users/${data.uid}/photo`, (snapshot) => {
+        if (snapshot.val()) {
+          downloadImage(`${data.uid}/${snapshot.val()}`)
+            .then((url) => {
+              const img = new Image();
+              img.src = url;
+              img.onload = () => {
+                commit("setCompanionPhoto", {
+                  dialogID: data.dialogID,
+                  photo: img,
+                });
+              };
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+        }
       });
     },
     subscribeToUpdateDialogs({ commit, dispatch }, uid) {
@@ -213,10 +250,28 @@ export default createStore({
         }
       });
     },
-    subscribeToUpdateMessages({ commit }, id) {
+    subscribeToUpdateMessages({ commit, state }, id) {
       subscribeToUpadate(`dialogs/${id}/messages`, (snapshot) => {
-        commit("changeMessagesOfDialog", { mess: snapshot.val(), id: id });
+        const mess = snapshot.val();
+        if (
+          id == state.currentDialog &&
+          mess[mess.length - 1].from != state.uid
+        ) {
+          mess[mess.length - 1].watched = true;
+        }
+        writeData(`dialogs/${id}/messages`, mess);
+        commit("changeMessagesOfDialog", { mess: mess, id: id });
       });
+    },
+    openDialog({ state, commit }, id) {
+      if (state.dialogs.length) {
+        const messages = state.dialogs.filter((el) => el.id == id)[0].messages;
+        for (let message of messages) {
+          if (message.from != state.uid) message.watched = true;
+        }
+        writeData(`dialogs/${id}/messages`, messages);
+        commit("setCurrentDialog", id);
+      }
     },
     changeUserName({ commit, state }, name) {
       writeData(`users/${state.uid}/name`, name)
@@ -242,6 +297,7 @@ export default createStore({
           userPhoto.src = url;
           userPhoto.onload = () => {
             commit("setPhoto", userPhoto);
+            commit("setDownload", false);
           };
         })
         .catch((err) => {
@@ -249,6 +305,8 @@ export default createStore({
         });
     },
     uploadUserPhoto({ commit, state }, file) {
+      commit("setDownload", true);
+
       const fileReader = new FileReader();
 
       fileReader.readAsDataURL(file);
@@ -262,6 +320,7 @@ export default createStore({
             img.src = URL;
             img.onload = () => {
               commit("setPhoto", img);
+              commit("setDownload", false);
             };
           });
         });
@@ -273,6 +332,7 @@ export default createStore({
       messages.push({
         from: state.uid,
         text: data.text,
+        watched: false,
       });
 
       writeData(`dialogs/${data.id}/messages`, messages);
@@ -307,6 +367,12 @@ export default createStore({
     },
   },
   mutations: {
+    setCurrentDialog(state, value) {
+      state.currentDialog = value;
+    },
+    setDownload(state, value) {
+      state.download = value;
+    },
     setUID(state, uid) {
       state.uid = uid;
     },
@@ -328,6 +394,16 @@ export default createStore({
     addUserInList(state, user) {
       state.users.push(user);
     },
+    setCompanionName(state, data) {
+      state.dialogs.filter(
+        (el) => el.id == data.dialogID
+      )[0].companionData.name = data.name;
+    },
+    setCompanionPhoto(state, data) {
+      state.dialogs.filter(
+        (el) => el.id == data.dialogID
+      )[0].companionData.photo = data.photo;
+    },
     clearUsersList(state) {
       state.users = [];
     },
@@ -345,6 +421,9 @@ export default createStore({
     },
   },
   getters: {
+    download(state) {
+      return state.download;
+    },
     uid(state) {
       return state.uid;
     },
