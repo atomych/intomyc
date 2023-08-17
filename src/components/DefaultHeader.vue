@@ -30,6 +30,8 @@
 
 .photo {
   width: 50px;
+  height: 50px;
+  object-fit: cover;
   margin-right: 10px;
 }
 </style>

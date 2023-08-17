@@ -34,6 +34,8 @@
 .photo {
   margin-right: 5px;
   width: 50px;
+  height: 50px;
+  object-fit: cover;
 }
 
 .name,

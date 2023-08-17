@@ -45,8 +45,9 @@
 }
 
 .photo {
+  object-fit: cover;
   width: 250px;
-  height: auto;
+  height: 250px;
 }
 
 .menu {
