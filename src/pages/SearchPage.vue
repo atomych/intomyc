@@ -2,7 +2,7 @@
   <div class="container">
     <default-header :title="'Search people'" class="head" />
     <input type="text" class="input" v-model="searchValue" />
-    <ul class="list">
+    <ul class="list scroll">
       <li class="list__item" v-for="user in normalizedUsers" :key="user.uid">
         <div class="left">
           <img :src="user.photoObj.src" alt="" class="photo" />
@@ -40,7 +40,7 @@
 
   padding: 5px 10px;
 
-  width: 100%;
+  width: 95%;
   max-width: 400px;
 
   margin-bottom: 30px;
@@ -52,6 +52,7 @@
   flex-direction: column;
   width: 100%;
   max-width: 800px;
+  padding: 0 20px;
 
   &__item {
     display: flex;
@@ -77,6 +78,8 @@
   object-fit: cover;
 
   margin-right: 15px;
+
+  border-radius: 50%;
 }
 
 .name {
