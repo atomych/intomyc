@@ -12,6 +12,10 @@
   background-color: #ad6cff;
 
   height: 100%;
+
+  @media (max-width: 600px) {
+    width: 100%;
+  }
 }
 </style>
 
