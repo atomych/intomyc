@@ -5,6 +5,7 @@
       class="input"
       :value="message"
       @input="$emit('update:message', $event.target.value)"
+      @keydown.enter="$emit('send')"
     />
     <button class="btn" @click="$emit('send')">Send</button>
   </div>
