@@ -11,6 +11,9 @@
         <button class="btn" @click="createDialog(user.uid)">Write</button>
       </li>
     </ul>
+    <div class="no-users" v-if="normalizedUsers.length == 0">
+      Failed to find users
+    </div>
   </div>
 </template>
 
@@ -69,8 +72,9 @@
 }
 
 .photo {
-  width: 40px;
-  height: auto;
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
 
   margin-right: 15px;
 }
@@ -79,6 +83,13 @@
   font-weight: 700;
   font-size: 20px;
   color: #000;
+}
+
+.no-users {
+  color: #000;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
 }
 
 .btn {

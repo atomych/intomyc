@@ -10,6 +10,7 @@
       :lastMess="dialog.messages[dialog.messages.length - 1].text"
       @click="toDialog(dialog.id)"
     />
+    <div class="no-dialogs" v-if="dialogs.length == 0">No dialogues yet</div>
   </div>
 </template>
 
@@ -21,6 +22,13 @@
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
+}
+
+.no-dialogs {
+  color: #000;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
 }
 </style>
 
