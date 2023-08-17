@@ -1,5 +1,14 @@
 <template>
-  <div class="message" :class="side">{{ text }}</div>
+  <div
+    class="message"
+    :class="{
+      left: side == 'left',
+      unwatched: unwatched,
+      right: side == 'right',
+    }"
+  >
+    {{ text }}
+  </div>
 </template>
 
 <style lang="scss" scoped>
@@ -10,19 +19,42 @@
   font-size: 18px;
 
   padding: 5px 10px;
+  clear: both;
+
+  position: relative;
+
+  &.unwatched:after {
+    display: block;
+    content: "";
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+
+    width: 10px;
+    height: 10px;
+
+    border-radius: 50%;
+    background-color: #ffffff8d;
+  }
 
   &.left {
-    align-self: start;
+    float: left;
     border-top-right-radius: 8px;
     border-bottom-right-radius: 8px;
     border-top-left-radius: 8px;
+    &:after {
+      right: -20px;
+    }
   }
 
   &.right {
-    align-self: end;
+    float: right;
     border-top-left-radius: 8px;
     border-bottom-left-radius: 8px;
     border-top-right-radius: 8px;
+    &:after {
+      left: -20px;
+    }
   }
 
   &.start {
@@ -44,6 +76,11 @@ export default {
     side: {
       type: String,
       default: "right",
+      required: true,
+    },
+    unwatched: {
+      type: Boolean,
+      default: false,
       required: true,
     },
   },
