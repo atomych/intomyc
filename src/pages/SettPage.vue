@@ -44,6 +44,8 @@
   width: 100%;
   max-width: 800px;
 
+  padding: 0 10px;
+
   &__item {
     display: block;
 
