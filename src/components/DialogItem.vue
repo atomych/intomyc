@@ -32,10 +32,11 @@
 }
 
 .photo {
-  margin-right: 5px;
+  margin-right: 15px;
   width: 50px;
   height: 50px;
   object-fit: cover;
+  border-radius: 50%;
 }
 
 .name,
