@@ -23,6 +23,7 @@
       @clickIn="toCreate()"
       class="link-out"
     />
+    <download-display :work="download" />
   </div>
 </template>
 
@@ -31,6 +32,16 @@
   padding: 20px 100px;
   background-color: #ffffff8d;
   border-radius: 20px;
+
+  @media (max-width: 600px) {
+    width: 100%;
+    height: 100%;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 .title {
@@ -77,8 +88,9 @@
 import DefaultField from "../components/DefaultField.vue";
 import DefaultButton from "../components/DefaultButton.vue";
 import DefaultLink from "../components/DefaultLink.vue";
+import DownloadDisplay from "../components/DownloadDisplay.vue";
 
-import { mapActions } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 
 export default {
   name: "EntryPage",
@@ -87,6 +99,7 @@ export default {
     DefaultField,
     DefaultButton,
     DefaultLink,
+    DownloadDisplay,
   },
 
   data() {
@@ -101,6 +114,7 @@ export default {
     const auto = localStorage.getItem("checkbox");
 
     if (key && auto) {
+      this.work = true;
       this.autoEntry({
         key: key,
         cb: () => {
@@ -115,15 +129,28 @@ export default {
 
     login() {
       if (this.email != "" && this.password.length >= 6) {
-        this.auth({ email: this.email, password: this.password });
-        this.$router.push({ name: "user" });
-        localStorage.setItem("checkbox", this.$refs.check.checked ? true : "");
+        this.work = true;
+        this.auth({
+          email: this.email,
+          password: this.password,
+          cb: () => {
+            this.$router.push({ name: "user" });
+            localStorage.setItem(
+              "checkbox",
+              this.$refs.check.checked ? true : ""
+            );
+          },
+        });
       }
     },
 
     toCreate() {
       this.$router.push({ name: "reg" });
     },
+  },
+
+  computed: {
+    ...mapGetters(["download"]),
   },
 };
 </script>
