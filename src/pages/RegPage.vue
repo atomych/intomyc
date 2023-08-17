@@ -38,6 +38,16 @@
   padding: 20px 100px;
   background-color: #ffffff8d;
   border-radius: 20px;
+
+  @media (max-width: 600px) {
+    height: 100%;
+    width: 100%;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 .field-out {
@@ -86,7 +96,6 @@ export default {
     ...mapActions(["loginNewUser"]),
 
     create() {
-      console.log(this.email);
       if (this.password == this.password2 && this.password.length >= 6) {
         this.loginNewUser({
           email: this.email,
