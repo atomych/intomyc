@@ -108,7 +108,9 @@ export default createStore({
         }).then(() => {
           writeData(
             `users/${state.uid}/dialogs`,
-            state.dialogsID.length ? [...state.dialogsID, dialogID] : [dialogID]
+            state.dialogsID.length
+              ? [...state.dialogsID, dialogID]
+              : ["dnone", dialogID]
           ).then(() => {
             writeData(`users/${startData.userUID}/dialogs`, data.dialogs).then(
               () => {
@@ -356,7 +358,18 @@ export default createStore({
       return state.photo;
     },
     users(state) {
-      return state.users.filter((el) => el.uid != state.uid);
+      const usersInDialogs = [state.uid];
+      const result = [];
+
+      for (let item of state.dialogs) {
+        usersInDialogs.push(item.uids.filter((el) => el != state.uid)[0]);
+      }
+
+      for (let item of state.users) {
+        if (usersInDialogs.indexOf(item.uid) == -1) result.push(item);
+      }
+
+      return result;
     },
   },
 });
