@@ -6,7 +6,7 @@
         dialogs.filter((el) => el.id == id)[0]?.companionData.photo.src
       "
     />
-    <ul class="list">
+    <div class="list scroll">
       <dialog-message
         v-for="(mess, index) in dialogs.filter((el) => el.id == id)[0]
           ?.messages"
@@ -15,9 +15,10 @@
           mess.from == 'start' ? 'start' : mess.from == uid ? 'right' : 'left'
         "
         :text="mess.text"
+        :unwatched="!mess.watched"
         class="mess"
       />
-    </ul>
+    </div>
     <message-input @send="send()" v-model:message="message" />
   </div>
 </template>
@@ -28,7 +29,13 @@
   flex-direction: column;
   align-items: center;
 
+  padding: 0 10px;
   padding-bottom: 50px;
+  overflow: hidden;
+
+  @media (max-width: 830px) {
+    padding-bottom: 0;
+  }
 }
 
 .list {
@@ -36,13 +43,13 @@
   max-width: 800px;
 
   flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: end;
 
-  padding: 20px 0;
+  margin: 10px 0;
+  padding: 0 20px;
 
   position: relative;
+
+  overflow-y: scroll;
 }
 
 .mess {
@@ -55,7 +62,7 @@ import DefaultHeader from "../components/DefaultHeader.vue";
 import DialogMessage from "../components/DialogMessage.vue";
 import MessageInput from "../components/MessageInput.vue";
 
-import { mapGetters, mapActions } from "vuex";
+import { mapGetters, mapActions, mapMutations } from "vuex";
 
 export default {
   name: "DialogPage",
@@ -75,6 +82,11 @@ export default {
 
   created() {
     this.id = this.$route.params.id;
+    this.openDialog(this.id);
+  },
+
+  unmounted() {
+    this.setCurrentDialog("");
   },
 
   computed: {
@@ -82,7 +94,8 @@ export default {
   },
 
   methods: {
-    ...mapActions(["sendMessage"]),
+    ...mapActions(["sendMessage", "openDialog"]),
+    ...mapMutations(["setCurrentDialog"]),
 
     send() {
       this.sendMessage({ text: this.message, id: this.id });
